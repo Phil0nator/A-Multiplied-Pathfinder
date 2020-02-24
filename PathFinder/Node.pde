@@ -1,9 +1,9 @@
 
-public Node TARGET;
-public Node START;
+public Node TARGET; //The current target node of the algorithm
+public Node START; //The current Start node of the algorithm
 ArrayList<ArrayList<Node>> GRID = new ArrayList<ArrayList<Node>>();
-ArrayList<Node> OPEN = new ArrayList<Node>();
-ArrayList<Node> CLOSED = new ArrayList<Node>();
+ArrayList<Node> OPEN = new ArrayList<Node>(); //all nodes opened (indexed in no particular order)
+ArrayList<Node> CLOSED = new ArrayList<Node>(); // all nodes closed  (indexed in no particular order)
 
 
 public int GRIDDIM = 25;
@@ -11,11 +11,11 @@ public int NODEDIM;
 
 
 public class Node{
-
+  //Costs under their standard names for an A* algorithm:
   int fcost;
   int gcost;
   int hcost;
-
+  //Index in the grid
   int x;
   int y;
 
@@ -25,7 +25,8 @@ public class Node{
   boolean start;
   boolean wall;
   boolean path;
-
+  
+  //Neighbors and parent:
   Node parent;
   Node up;
   Node upRight;
@@ -44,8 +45,10 @@ public class Node{
   }
 
 
-  int distTo(Node alpha){
-
+  int distTo(Node alpha){ //find approxomate distance from any other node
+    //NOTE:
+    //distTo is a very Heuristical approach, and basically assumes that no walls are present.
+    //This works fine for A* algorithms because it will use the costs and the wall boolean adapt.
     int dx = abs(x-alpha.x);
     int dy = abs(y-alpha.y);
 
@@ -53,13 +56,22 @@ public class Node{
 
   }
 
-  Node simpleCopy(){
+  Node simpleCopy(){ //Quick Copy Constructor
     Node out = new Node(x,y);
     out.parent=parent;
     return out;
   }
 
-  int pathToStart(){
+  int pathToStart(){ //Finds a path back to start
+     ////////////////
+     // --Explination:
+     //    -Creates a copy of self
+     //    -While none of the Parents of that copy equal the starter node:
+     //      +Add Geometric distance from start to total,
+     //      +Set the copy equal to    a copy of the copy's parents
+     //      +Try again until one of the parents is the starter node
+     /////////////////
+  
     if(start)return 0;
     boolean finished = false;
     int total = 0;
@@ -96,8 +108,9 @@ public class Node{
 
           if(!neighbor.closed){
             if(!neighbor.open){
-
+              //at this point, we have each valid neighbor
               if(neighbor.target){
+                //for when the program has completed its task
                 state = State.done;
                 neighbor.parent=this;
                 finishMessage = "Fastest Path Found in ";
@@ -106,13 +119,13 @@ public class Node{
               }
 
 
-
+              //now the neighbor has been accessed, so it is open
               neighbor.open=true;
               OPEN.add(neighbor);
               neighbor.parent=this;
               neighbor.findCosts();
             }else{
-              if(neighbor.gcost>gcost+distTo(neighbor)){
+              if(neighbor.gcost>gcost+distTo(neighbor)){ //If this node was already done, BUT is still a better option:
                 neighbor.parent=this;
                 neighbor.gcost = gcost+distTo(neighbor);
               }
@@ -127,13 +140,13 @@ public class Node{
     }
     open=false;
     closed=true;
-
+    //Now the Node has been accessed, and operated on. It is now closed
 
   }
 
 
 
-  void d(){
+  void d(){ //visualize
     pushMatrix();
     translate(x*NODEDIM, y*NODEDIM);
     if(!open&&!target&&!start&&!closed&&!wall){
@@ -171,9 +184,9 @@ public class Node{
 
 
   void findCosts(){
-
-      gcost = parent.gcost+distTo(parent);
-      hcost = distTo(TARGET);
+      
+      gcost = parent.gcost+distTo(parent); // geometric distance
+      hcost = distTo(TARGET); //Geometric distance
       fcost = gcost+hcost;
 
   }
@@ -204,7 +217,7 @@ Node getNode(int x, int y){
 
 
 
-public void setupGrid(int x, int y){
+public void setupGrid(int x, int y){ //Fill in all the ArrayLists properly
   GRID.clear();
 
   for(int i = 0; i < x;i++){
@@ -239,8 +252,8 @@ public void setupGrid(int x, int y){
 
 }
 
-Node lowestCost(){
-
+Node lowestCost(){ //Find the cheapest option out of all available(open) nodes
+  //NOTE: Basically just a min() function, just for open nodes
   int lowest = OPEN.get(0).fcost;
   Node lowestNode = OPEN.get(0);
   for(Node n : OPEN){
@@ -257,7 +270,7 @@ Node lowestCost(){
 }
 
 
-void itorate(){
+void itorate(){ //iterate
 
   Node tester = lowestCost();
   tester.check();
@@ -271,7 +284,7 @@ void itorate(){
 }
 
 void backProp(){
-
+  //once the path has been found, the algorithm backtracks to the start, setting the FASTEST route to path (making them blue)
   boolean finished = false;
   Node current = TARGET;
   while(!finished){

@@ -1,4 +1,5 @@
-
+//Messy Configuration for all the UI Elements.
+//See UILibrary for declarations
 
 Page setupGrid = new Page(0,0,0,0);
 Button gridBigger;

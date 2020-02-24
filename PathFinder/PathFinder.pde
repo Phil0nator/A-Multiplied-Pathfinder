@@ -1,11 +1,13 @@
 void setup(){
 
 
-  fullScreen(P2D);
-  setupUI();
+  fullScreen(P2D); //Initialize window with the Accelerated GPU Renderer
+  setupUI(); //See UILibrary
 
   NODEDIM = height/GRIDDIM;
+  
   setupGrid(GRIDDIM,GRIDDIM);
+  
   configurateUI();
 }
 
